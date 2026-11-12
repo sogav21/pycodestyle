@@ -391,7 +391,7 @@ def blank_lines(logical_line, blank_lines, indent_level, line_number,
         ):
             return
         if indent_level:
-            if not (blank_before == method_lines or
+            if not (blank_before >= method_lines or
                     previous_indent_level < indent_level or
                     DOCSTRING_REGEX.match(previous_logical)
                     ):

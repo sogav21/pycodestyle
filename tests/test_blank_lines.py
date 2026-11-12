@@ -380,6 +380,31 @@ def a():
 """)
         self.assertNoErrors(result)
 
+    def test_nested_extra_blank_lines_before_comment(self):
+        """Extra blank lines before a comment do not cause E306."""
+        result = errors_from_src("""def outer():
+    x = 1
+
+
+    # A comment before a blank line and a nested definition.
+
+    def inner():
+        pass
+
+
+def another_outer():
+    x = 1
+
+
+    # A comment immediately before a nested definition.
+    def inner():
+        pass
+""")
+        self.assertEqual([
+            'E303:5:5',
+            'E303:15:5',
+        ], result)
+
 
 class TestBlankLinesTwisted(BlankLinesTestCase):
     """
@@ -394,6 +419,30 @@ class TestBlankLinesTwisted(BlankLinesTestCase):
 
     def tearDown(self):
         pycodestyle.BLANK_LINES_CONFIG = self._original_lines_config
+
+    def test_nested_extra_blank_lines_before_comment(self):
+        """Extra configured blank lines still cause E303, not E306."""
+        result = errors_from_src("""def outer():
+    x = 1
+
+
+
+    # A comment before a nested definition.
+    def inner():
+        pass
+""")
+        self.assertEqual(['E303:6:5'], result)
+
+    def test_nested_too_few_blank_lines_before_comment(self):
+        """One blank line is insufficient when two are configured."""
+        result = errors_from_src("""def outer():
+    x = 1
+
+    # A comment before a nested definition.
+    def inner():
+        pass
+""")
+        self.assertEqual(['E306:5:5'], result)
 
     def test_initial_lines_one_blanks(self):
         """
